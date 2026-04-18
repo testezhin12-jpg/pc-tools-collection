@@ -1,23 +1,27 @@
-// Default configuration values
-const defaultConfig = {
-    host: 'localhost',
-    port: 3000,
-    env: 'development',
-    logLevel: 'info',
-};
+import fs from 'fs';
+import path from 'path';
+import winston from 'winston';
+import { format } from 'winston';
 
-// Interface for configuration type
-interface Config {
-    host: string;
-    port: number;
-    env: string;
-    logLevel: string;
+const logDirectory = path.join(__dirname, 'logs');
+
+if (!fs.existsSync(logDirectory)) {
+    fs.mkdirSync(logDirectory);
 }
 
-// Function to load configuration with defaults
-function loadConfig(customConfig: Partial<Config>): Config {
-    return { ...defaultConfig, ...customConfig };
-}
+const transport = new winston.transports.File({
+    filename: path.join(logDirectory, 'app.log'),
+    maxSize: '20m',
+    maxFiles: '10',
+});
 
-// Exporting the loadConfig function for use elsewhere
-export { loadConfig };
+const logger = winston.createLogger({
+    level: 'info',
+    format: format.combine(
+        format.timestamp(),
+        format.json()
+    ),
+    transports: [transport],
+});
+
+export default logger;
