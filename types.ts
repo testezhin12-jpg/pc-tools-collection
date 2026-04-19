@@ -1,37 +1,17 @@
-export interface User {
-    id: string;
-    name: string;
+export interface UserInput {
+    age: number;
     email: string;
 }
 
-export interface Product {
-    id: string;
-    title: string;
-    price: number;
-    inStock: boolean;
+export function validateUserInput(input: UserInput): boolean {
+    if (input.age < 0 || input.age > 120) {
+        console.error('Invalid age: Must be between 0 and 120');
+        return false;
+    }
+    const emailPattern = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+    if (!emailPattern.test(input.email)) {
+        console.error('Invalid email format');
+        return false;
+    }
+    return true;
 }
-
-export interface Order {
-    id: string;
-    userId: string;
-    productIds: string[];
-    totalAmount: number;
-    orderDate: Date;
-}
-
-export type ApiResponse<T> = {
-    success: boolean;
-    data?: T;
-    message?: string;
-};
-
-export type UserRole = 'admin' | 'user' | 'guest';
-
-export const DEFAULT_USER_ROLE: UserRole = 'user';
-
-export interface Pagination<T> {
-    items: T[];
-    totalCount: number;
-    page: number;
-    pageSize: number;
-};
