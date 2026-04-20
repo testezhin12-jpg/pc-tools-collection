@@ -1,35 +1,29 @@
-export function isObject(value: any): boolean {
-    return value !== null && typeof value === 'object';
-}
-
-export function deepMerge<T>(target: T, source: Partial<T>): T {
-    if (!isObject(target) || !isObject(source)) {
-        return target;
-    }
-
-    const output = { ...target };
-
-    for (const key of Object.keys(source)) {
-        const value = source[key];
-        if (isObject(value)) {
-            if (!(key in target)) {
-                Object.assign(output, { [key]: value });
-            } else {
-                output[key] = deepMerge(target[key], value);
-            }
-        } else {
-            Object.assign(output, { [key]: value });
-        }
-    }
-    return output;
-}
-
-export function cloneDeep<T>(obj: T): T {
+function deepClone<T>(obj: T): T {
     return JSON.parse(JSON.stringify(obj));
 }
 
-export function getNestedProperty(obj: Record<string, any>, path: string): any {
-    return path.split('.').reduce((nestedObj, key) => {
-        return (nestedObj && key in nestedObj) ? nestedObj[key] : undefined;
-    }, obj);
+function isEmpty(obj: Record<string, unknown>): boolean {
+    return Object.keys(obj).length === 0;
 }
+
+function mergeDeep<T>(target: T, source: Partial<T>): T {
+    for (const key in source) {
+        if (source[key] instanceof Object && key in target) {
+            Object.assign(source[key], mergeDeep(target[key] as T, source[key]));
+        }
+    }
+    Object.assign(target || {}, source);
+    return target;
+}
+
+function debounce(func: (...args: unknown[]) => void, wait: number): (...args: unknown[]) => void {
+    let timeoutId: NodeJS.Timeout;
+    return function (...args: unknown[]) {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => {
+            func.apply(this, args);
+        }, wait);
+    };
+}
+
+export { deepClone, isEmpty, mergeDeep, debounce };
