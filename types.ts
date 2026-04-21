@@ -1,26 +1,58 @@
-/* Represents a generic tool in the PC tools collection */
+/**
+ * Represents a User in the system.
+ * @interface User
+ */
+interface User {
+    /**
+     * Unique identifier for the user.
+     * @type {string}
+     */
+    id: string;
+    /**
+     * The user's full name.
+     * @type {string}
+     */
+    name: string;
+    /**
+     * The user's email address.
+     * @type {string}
+     */
+    email: string;
+    /**
+     * The user's age.
+     * @type {number}
+     */
+    age: number;
+    /**
+     * Indicates if the user is active.
+     * @type {boolean}
+     */
+    isActive: boolean;
+}
 
-type Tool = {
-    id: number;  // Unique identifier for each tool
-    name: string;  // Name of the tool
-    description: string;  // Brief description of the tool
-    isAvailable: boolean;  // Availability status of the tool
-    category: ToolCategory;  // Category to which the tool belongs
-};
-
-/* Enum for tool categories */
-type ToolCategory = 'hardware' | 'software' | 'utility' | 'accessory';
-
-/* Represents a user in the system */
-type User = {
-    userId: number;  // Unique identifier for the user
-    username: string;  // Username chosen by the user
-    email: string;  // User's email address
-    registered: Date;  // Registration date of the user
-};
-
-/* Represents a collection of tools */
-type ToolCollection = {
-    tools: Tool[];  // Array of tools in the collection
-    totalCount: number;  // Total number of tools
-};
+/**
+ * Represents a Product in the inventory.
+ * @interface Product
+ */
+interface Product {
+    /**
+     * Unique identifier for the product.
+     * @type {string}
+     */
+    id: string;
+    /**
+     * Name of the product.
+     * @type {string}
+     */
+    title: string;
+    /**
+     * Price of the product.
+     * @type {number}
+     */
+    price: number;
+    /**
+     * Stock quantity of the product.
+     * @type {number}
+     */
+    quantity: number;
+}
