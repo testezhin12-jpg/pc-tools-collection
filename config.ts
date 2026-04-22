@@ -1,37 +1,34 @@
-// Configuration options for the application
-
-interface Config {
-    appName: string;
-    version: string;
-    port: number;
+// Configuration settings for the application
+export interface Config {
+    apiUrl: string;
+    timeout: number;
+    retryAttempts: number;
 }
 
-const config: Config = {
-    appName: 'PC Tools Collection',
-    version: '1.0.0',
-    port: 3000,
+const defaultConfig: Config = {
+    apiUrl: 'https://api.example.com',
+    timeout: 5000,
+    retryAttempts: 3
 };
 
-function validateConfig(config: Config): boolean {
-    if (!config.appName || typeof config.appName !== 'string') {
-        console.error('Invalid appName');
-        return false;
+export function getConfig(): Config {
+    const envConfig = process.env.CONFIG as unknown;
+    if (typeof envConfig !== 'object' || envConfig === null) {
+        console.error('Invalid configuration format. Using default settings.');
+        return defaultConfig;
     }
-    if (!config.version || typeof config.version !== 'string') {
-        console.error('Invalid version');
-        return false;
-    }
-    if (!Number.isInteger(config.port) || config.port <= 0) {
-        console.error('Invalid port');
-        return false;
-    }
-    return true;
-}
 
-if (validateConfig(config)) {
-    console.log('Config is valid:', config);
-} else {
-    console.log('Config validation failed!');
-}
+    const config = { ...defaultConfig, ...envConfig } as Config;
 
-export { config };
+    if (config.timeout <= 0) {
+        console.warn('Timeout must be a positive number. Using default timeout.');
+        config.timeout = defaultConfig.timeout;
+    }
+
+    if (config.retryAttempts < 0) {
+        console.warn('Retry attempts must be zero or greater. Using default retry attempts.');
+        config.retryAttempts = defaultConfig.retryAttempts;
+    }
+
+    return config;
+}
