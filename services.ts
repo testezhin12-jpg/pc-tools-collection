@@ -1,34 +1,21 @@
-import { someUtilityFunction } from './utils';
+import { validateString, validateNumber } from './utils';
 
-export interface ServiceData {
-    id: number;
-    name: string;
-    active: boolean;
+interface UserInput {
+  name: string;
+  age: number;
 }
 
-const services: ServiceData[] = [
-    { id: 1, name: 'Service A', active: true },
-    { id: 2, name: 'Service B', active: false },
-    { id: 3, name: 'Service C', active: true },
-    { id: 4, name: 'Service D', active: false },
-];
+function processInput(input: UserInput) {
+  // Validate input data
+  if (!validateString(input.name)) {
+    throw new Error('Invalid name');
+  }
+  if (!validateNumber(input.age)) {
+    throw new Error('Invalid age');
+  }
 
-export function getActiveServices(): ServiceData[] {
-    return services.filter(service => service.active);
+  // Main processing logic
+  console.log(`Processing user: ${input.name}, Age: ${input.age}`);
 }
 
-export function getServiceById(id: number): ServiceData | undefined {
-    return services.find(service => service.id === id);
-}
-
-export function toggleServiceStatus(id: number): void {
-    const service = getServiceById(id);
-    if (service) {
-        service.active = !service.active;
-    }
-}
-
-export function optimizeServiceLookup(ids: number[]): ServiceData[] {
-    const serviceMap = new Map<number, ServiceData>(services.map(service => [service.id, service]));
-    return ids.map(id => serviceMap.get(id)).filter((service): service is ServiceData => Boolean(service));
-}
+export { processInput };
