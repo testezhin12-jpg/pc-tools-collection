@@ -1,29 +1,21 @@
-import { createLogger, format, transports } from 'winston';
-import 'winston-daily-rotate-file';
+import { config } from 'dotenv';
 
-const transport = new (transports.DailyRotateFile)({
-    filename: 'logs/application-%DATE%.log',
-    datePattern: 'YYYY-MM-DD',
-    zippedArchive: true,
-    maxSize: '20m',
-    maxFiles: '14d',
-});
+// Load environment variables from .env file
+config();
 
-const logger = createLogger({
-    level: 'info',
-    format: format.combine(
-        format.timestamp(),
-        format.json()
-    ),
-    transports: [
-        transport,
-        new transports.Console({
-            format: format.combine(
-                format.colorize(),
-                format.simple()
-            )
-        }),
-    ],
-});
+// Application configuration interface
+interface AppConfig {
+    port: number;
+    dbURI: string;
+    logLevel: 'debug' | 'info' | 'warn' | 'error';
+}
 
-export default logger;
+// Configuration object
+const appConfig: AppConfig = {
+    port: Number(process.env.PORT) || 3000,
+    dbURI: process.env.DB_URI || 'mongodb://localhost:27017/myapp',
+    logLevel: (process.env.LOG_LEVEL as 'debug' | 'info' | 'warn' | 'error') || 'info',
+};
+
+// Export the configuration for use in the application
+export default appConfig;
