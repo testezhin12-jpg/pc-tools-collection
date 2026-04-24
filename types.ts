@@ -1,27 +1,20 @@
-export interface PerformanceMetrics {
-    executionTime: number;
-    memoryUsage: number;
-    requestCount: number;
+export interface UserInput {
+    name: string;
+    age: number;
+    email: string;
 }
 
-export interface OptimizedFunction<T> {
-    (input: T): Promise<PerformanceMetrics>;
+export function validateInput(input: UserInput): boolean {
+    const nameValid = typeof input.name === 'string' && input.name.trim() !== '';
+    const ageValid = typeof input.age === 'number' && input.age > 0;
+    const emailValid = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b/.test(input.email);
+
+    return nameValid && ageValid && emailValid;
 }
 
-export function createOptimizedFunction<T>(
-    fn: (input: T) => Promise<any>
-): OptimizedFunction<T> {
-    return async (input: T): Promise<PerformanceMetrics> => {
-        const startTime = performance.now();
-        const initialMemory = performance.memory.usedJSHeapSize;
-        const result = await fn(input);
-        const endTime = performance.now();
-        const finalMemory = performance.memory.usedJSHeapSize;
-
-        return {
-            executionTime: endTime - startTime,
-            memoryUsage: finalMemory - initialMemory,
-            requestCount: 1,
-        };
-    };
+export function processInput(input: UserInput): void {
+    if (!validateInput(input)) {
+        throw new Error('Invalid input data');
+    }
+    console.log('Processing input:', input);
 }
