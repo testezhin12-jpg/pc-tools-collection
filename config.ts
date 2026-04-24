@@ -1,34 +1,29 @@
-// Configuration settings for the application
-export interface Config {
-    apiUrl: string;
-    timeout: number;
-    retryAttempts: number;
-}
+import { createLogger, format, transports } from 'winston';
+import 'winston-daily-rotate-file';
 
-const defaultConfig: Config = {
-    apiUrl: 'https://api.example.com',
-    timeout: 5000,
-    retryAttempts: 3
-};
+const transport = new (transports.DailyRotateFile)({
+    filename: 'logs/application-%DATE%.log',
+    datePattern: 'YYYY-MM-DD',
+    zippedArchive: true,
+    maxSize: '20m',
+    maxFiles: '14d',
+});
 
-export function getConfig(): Config {
-    const envConfig = process.env.CONFIG as unknown;
-    if (typeof envConfig !== 'object' || envConfig === null) {
-        console.error('Invalid configuration format. Using default settings.');
-        return defaultConfig;
-    }
+const logger = createLogger({
+    level: 'info',
+    format: format.combine(
+        format.timestamp(),
+        format.json()
+    ),
+    transports: [
+        transport,
+        new transports.Console({
+            format: format.combine(
+                format.colorize(),
+                format.simple()
+            )
+        }),
+    ],
+});
 
-    const config = { ...defaultConfig, ...envConfig } as Config;
-
-    if (config.timeout <= 0) {
-        console.warn('Timeout must be a positive number. Using default timeout.');
-        config.timeout = defaultConfig.timeout;
-    }
-
-    if (config.retryAttempts < 0) {
-        console.warn('Retry attempts must be zero or greater. Using default retry attempts.');
-        config.retryAttempts = defaultConfig.retryAttempts;
-    }
-
-    return config;
-}
+export default logger;
