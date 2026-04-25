@@ -1,51 +1,29 @@
-// TypeScript interface for a user
-interface User {
-    /**
-     * Unique identifier for the user
-     */
-    id: string;
-
-    /**
-     * The user's full name
-     */
+export interface User {
+    id: number;
     name: string;
-
-    /**
-     * The user's email address
-     */
     email: string;
-
-    /**
-     * The user's age (optional)
-     */
-    age?: number;
+    createdAt: Date;
 }
 
-/**
- * Type for a function that accepts a user and returns a boolean indicating success.
- * @param user - The user to be processed
- * @returns True if successful, false otherwise
- */
-type UserProcessor = (user: User) => boolean;
+export interface Product {
+    id: number;
+    name: string;
+    price: number;
+    inStock: boolean;
+}
 
-/**
- * Type for the response from the user creation service
- */
-interface UserCreationResponse {
-    /**
-     * Indicates if the user creation was successful
-     */
+export interface Order {
+    orderId: number;
+    userId: number;
+    productIds: number[];
+    totalAmount: number;
+    orderDate: Date;
+}
+
+export interface ApiResponse<T> {
     success: boolean;
-
-    /**
-     * Message providing additional info about the operation
-     */
-    message: string;
-
-    /**
-     * The created user object, if successful
-     */
-    user?: User;
+    data?: T;
+    error?: string;
 }
 
-export { User, UserProcessor, UserCreationResponse };
+export type UserRole = 'admin' | 'user' | 'guest';
