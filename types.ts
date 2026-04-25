@@ -1,20 +1,51 @@
-export interface UserInput {
+// TypeScript interface for a user
+interface User {
+    /**
+     * Unique identifier for the user
+     */
+    id: string;
+
+    /**
+     * The user's full name
+     */
     name: string;
-    age: number;
+
+    /**
+     * The user's email address
+     */
     email: string;
+
+    /**
+     * The user's age (optional)
+     */
+    age?: number;
 }
 
-export function validateInput(input: UserInput): boolean {
-    const nameValid = typeof input.name === 'string' && input.name.trim() !== '';
-    const ageValid = typeof input.age === 'number' && input.age > 0;
-    const emailValid = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b/.test(input.email);
+/**
+ * Type for a function that accepts a user and returns a boolean indicating success.
+ * @param user - The user to be processed
+ * @returns True if successful, false otherwise
+ */
+type UserProcessor = (user: User) => boolean;
 
-    return nameValid && ageValid && emailValid;
+/**
+ * Type for the response from the user creation service
+ */
+interface UserCreationResponse {
+    /**
+     * Indicates if the user creation was successful
+     */
+    success: boolean;
+
+    /**
+     * Message providing additional info about the operation
+     */
+    message: string;
+
+    /**
+     * The created user object, if successful
+     */
+    user?: User;
 }
 
-export function processInput(input: UserInput): void {
-    if (!validateInput(input)) {
-        throw new Error('Invalid input data');
-    }
-    console.log('Processing input:', input);
-}
+export { User, UserProcessor, UserCreationResponse };
