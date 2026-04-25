@@ -1,38 +1,35 @@
-function isEmpty(obj: Record<string, unknown>): boolean {
-    return Object.keys(obj).length === 0;
+// Utility functions for string manipulations
+
+/**
+ * Capitalizes the first letter of a string.
+ * @param str - The input string to capitalize.
+ * @returns A new string with the first letter capitalized.
+ */
+function capitalizeFirstLetter(str: string): string {
+    if (!str) return str;
+    return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-function deepClone<T>(obj: T): T {
-    return JSON.parse(JSON.stringify(obj));
+/**
+ * Converts a string to kebab-case.
+ * @param str - The input string to convert.
+ * @returns A kebab-cased version of the input string.
+ */
+function toKebabCase(str: string): string {
+    return str
+        .trim()
+        .replace(/\s+/g, '-')
+        .replace(/[^a-zA-Z0-9-]+/g, '')
+        .toLowerCase();
 }
 
-function mergeDeep<T>(target: T, ...sources: Partial<T>[]): T {
-    if (!sources.length) return target;
-    const source = sources.shift();
-
-    if (typeof target === 'object' && target !== null && source) {
-        for (const key in source) {
-            if (source.hasOwnProperty(key)) {
-                if (typeof source[key] === 'object' && source[key] !== null) {
-                    if (!target[key]) Object.assign(target, { [key]: {} });
-                    mergeDeep(target[key], source[key]);
-                } else {
-                    Object.assign(target, { [key]: source[key] });
-                }
-            }
-        }
-    }
-    return mergeDeep(target, ...sources);
+/**
+ * Reverses a given string.
+ * @param str - The string to reverse.
+ * @returns A new string that is the reverse of the input string.
+ */
+function reverseString(str: string): string {
+    return str.split('').reverse().join('');
 }
 
-function debounce(func: Function, delay: number) {
-    let timeoutId: NodeJS.Timeout;
-    return function(...args: any[]) {
-        if (timeoutId) clearTimeout(timeoutId);
-        timeoutId = setTimeout(() => {
-            func.apply(this, args);
-        }, delay);
-    };
-}
-
-export { isEmpty, deepClone, mergeDeep, debounce };
+export { capitalizeFirstLetter, toKebabCase, reverseString };
