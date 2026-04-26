@@ -1,21 +1,38 @@
-import { config } from 'dotenv';
-
-// Load environment variables from .env file
-config();
-
-// Application configuration interface
-interface AppConfig {
-    port: number;
-    dbURI: string;
-    logLevel: 'debug' | 'info' | 'warn' | 'error';
+export interface ConfigOptions {
+    apiEndpoint: string;
+    timeout: number;
+    retries: number;
 }
 
-// Configuration object
-const appConfig: AppConfig = {
-    port: Number(process.env.PORT) || 3000,
-    dbURI: process.env.DB_URI || 'mongodb://localhost:27017/myapp',
-    logLevel: (process.env.LOG_LEVEL as 'debug' | 'info' | 'warn' | 'error') || 'info',
-};
+export class Config {
+    private options: ConfigOptions;
 
-// Export the configuration for use in the application
-export default appConfig;
+    constructor(options: ConfigOptions) {
+        this.validateOptions(options);
+        this.options = options;
+    }
+
+    private validateOptions(options: ConfigOptions): void {
+        if (!options.apiEndpoint) {
+            throw new Error('API endpoint is required.');
+        }
+        if (options.timeout <= 0) {
+            throw new Error('Timeout must be a positive number.');
+        }
+        if (options.retries < 0) {
+            throw new Error('Retries cannot be negative.');
+        }
+    }
+
+    public getApiEndpoint(): string {
+        return this.options.apiEndpoint;
+    }
+
+    public getTimeout(): number {
+        return this.options.timeout;
+    }
+
+    public getRetries(): number {
+        return this.options.retries;
+    }
+}
