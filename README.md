@@ -1,48 +1,46 @@
-# pc-tools-collection
+# PC Tools Collection
 
-A curated collection of TypeScript utilities designed to streamline common tasks in both development and operations. This project provides a modular suite of tools that can enhance productivity in various environments.
+A versatile toolkit for tackling common development tasks using TypeScript, designed to enhance productivity and streamline workflows. The PC Tools Collection combines multiple utilities into a single package, making it easy to manage various aspects of your development process.
 
 ## Features
 
-- **Type-Safe Util Functions**: A set of reusable utilities enabling type-safe operations, including string manipulation, array handling, and file I/O.
-- **Configurable Logging**: An advanced logging utility that allows customizable log levels and output formats to suit different environments and needs.
-- **Environment Config Management**: Simplifies the management of environment configurations by providing a structured approach to handling environment variables.
-- **CLI Tool Integration**: Seamless integration with Command Line Interface tools for invoking utilities directly from the terminal, improving the developer experience.
+- **File Manipulation**: Easily read, write, and organize files with intuitive functions for text processing and file I/O operations.
+- **Data Validation**: Implement comprehensive validation checks for user inputs and data formats, ensuring data integrity in TypeScript projects.
+- **Custom Logging**: Integrate a robust logging system that dynamically adjusts output based on severity levels, improving debugging and monitoring.
+- **Configuration Management**: Simplify app configuration with a user-friendly interface for loading and managing environment variables and settings.
 
 ## Installation
 
-To install the `pc-tools-collection`, you will need Node.js and npm installed on your system. Then, you can install the package using:
+To get started with the PC Tools Collection, clone the repository and install the necessary dependencies:
 
 ```bash
-npm install pc-tools-collection
-```
-
-Alternatively, you can clone the repository directly:
-
-```bash
-git clone https://github.com/YourUsername/pc-tools-collection.git
+git clone https://github.com/yourusername/pc-tools-collection.git
 cd pc-tools-collection
 npm install
 ```
 
 ## Basic Usage Example
 
-After installation, you can start using the utilities as shown below:
+Here's a quick example of how to utilize the `FileManager` and `InputValidator` modules in your TypeScript project:
 
 ```typescript
-import { Logger, ConfigManager } from 'pc-tools-collection';
+import { FileManager } from './lib/FileManager';
+import { InputValidator } from './lib/InputValidator';
 
-// Initialize the logger
-const logger = new Logger({ level: 'info' });
-logger.log('This is an info message.');
+// Example: Create and write to a file
+const fileManager = new FileManager();
+fileManager.writeToFile('example.txt', 'Hello, PC Tools!');
 
-// Load environment configurations
-const config = new ConfigManager();
-const apiEndpoint = config.get('API_ENDPOINT');
-console.log(`Using API endpoint: ${apiEndpoint}`);
+// Example: Validate user input
+const validator = new InputValidator();
+const isValid = validator.validateEmail('test@example.com');
+
+console.log(`File written: example.txt`);
+console.log(`Is email valid? ${isValid}`);
 ```
 
 ## License
-![MIT License](https://img.shields.io/badge/license-MIT-brightgreen.svg)
 
-This project is licensed under the MIT License. See the LICENSE file for details.
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
