@@ -1,32 +1,33 @@
-import fs from 'fs';
-import path from 'path';
-
-interface ConfigOptions {
-    [key: string]: any;
+export interface UserInput {
+    inputValue: string;
 }
 
-const defaultConfig: ConfigOptions = {
-    host: 'localhost',
-    port: 3000,
-    debug: false,
-};
-
-/**
- * Loads configuration from a JSON file or uses default configuration.
- * @param filePath - path to the configuration file
- * @returns Merged configuration object
- */
-export function loadConfig(filePath: string): ConfigOptions {
-    const fullPath = path.resolve(filePath);
-    let fileConfig: ConfigOptions;
-    
-    try {
-        const rawConfig = fs.readFileSync(fullPath, 'utf-8');
-        fileConfig = JSON.parse(rawConfig);
-    } catch (error) {
-        console.warn('Could not load config file, using defaults.', error);
-        fileConfig = {};
+export function validateInput(input: UserInput): boolean {
+    const trimmedInput = input.inputValue.trim();
+    // Check for empty string
+    if (trimmedInput.length === 0) {
+        console.error('Input cannot be empty.');
+        return false;
     }
-    
-    return { ...defaultConfig, ...fileConfig };
+    // Check for maximum length
+    if (trimmedInput.length > 100) {
+        console.error('Input exceeds maximum length of 100 characters.');
+        return false;
+    }
+    // Validate for specific format (if required)
+    const validFormat = /^[a-zA-Z0-9]*$/;
+    if (!validFormat.test(trimmedInput)) {
+        console.error('Input contains invalid characters. Only alphanumeric characters are allowed.');
+        return false;
+    }
+    return true;
+}
+
+export function processInput(input: UserInput): void {
+    if (validateInput(input)) {
+        console.log('Processing input: ', input.inputValue);
+        // Main processing logic here
+    } else {
+        console.error('Input validation failed.');
+    }
 }
