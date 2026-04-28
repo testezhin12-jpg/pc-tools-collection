@@ -1,31 +1,30 @@
-type InputData = {
-    value: string;
-};
-
-function isValidInput(input: InputData): boolean {
-    const regex = /^[a-zA-Z0-9_]+$/; // Only allows alphanumeric and underscores
-    return regex.test(input.value);
+function isValidInput(input: string): boolean {
+    // Check if input is not empty and is a string
+    return typeof input === 'string' && input.trim().length > 0;
 }
 
-function processInputData(data: InputData): string {
-    if (!isValidInput(data)) {
-        throw new Error('Invalid input: must be alphanumeric and underscore');
+function processInput(input: string): string {
+    if (!isValidInput(input)) {
+        throw new Error('Invalid input: must be a non-empty string.');
     }
-    // Process the valid input as needed
-    return `Processed input: ${data.value}`;
+    // Continue processing valid input
+    return input.toUpperCase(); // Example transformation
 }
 
-function main(inputs: InputData[]): void {
-    inputs.forEach(input => {
+function mainProcessingLoop(inputs: string[]): string[] {
+    const results: string[] = [];
+    for (const input of inputs) {
         try {
-            const result = processInputData(input);
-            console.log(result);
+            const result = processInput(input);
+            results.push(result);
         } catch (error) {
-            console.error(error.message);
+            console.error(`Error processing input '${input}': ${error.message}`);
         }
-    });
+    }
+    return results;
 }
 
 // Example usage
-const inputs: InputData[] = [ { value: 'valid_input' }, { value: 'invalid input!' } ];
-main(inputs);
+const userInputs = ['hello', ' ', 'world', ''];
+const output = mainProcessingLoop(userInputs);
+console.log(output);
