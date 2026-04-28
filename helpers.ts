@@ -1,32 +1,31 @@
-// A set of utility functions for error handling
+type InputData = {
+    value: string;
+};
 
-export function handleError(error: unknown): string {
-    if (error instanceof Error) {
-        // Return the error message if it's an instance of Error
-        return error.message;
-    }
-    // For unexpected error types, return a generic message
-    return 'An unknown error occurred';
+function isValidInput(input: InputData): boolean {
+    const regex = /^[a-zA-Z0-9_]+$/; // Only allows alphanumeric and underscores
+    return regex.test(input.value);
 }
 
-export function validateInput(input: any): boolean {
-    // Check if input is defined and not null
-    if (input === undefined || input === null) {
-        throw new Error('Input cannot be undefined or null');
+function processInputData(data: InputData): string {
+    if (!isValidInput(data)) {
+        throw new Error('Invalid input: must be alphanumeric and underscore');
     }
-    // Further validation can be added as needed
-    return true;
+    // Process the valid input as needed
+    return `Processed input: ${data.value}`;
 }
 
-export function processData(data: any[]): void {
-    try {
-        data.forEach(item => {
-            validateInput(item);
-            // Perform processing on valid item
-            console.log('Processing:', item);
-        });
-    } catch (error) {
-        const message = handleError(error);
-        console.error(message);
-    }
+function main(inputs: InputData[]): void {
+    inputs.forEach(input => {
+        try {
+            const result = processInputData(input);
+            console.log(result);
+        } catch (error) {
+            console.error(error.message);
+        }
+    });
 }
+
+// Example usage
+const inputs: InputData[] = [ { value: 'valid_input' }, { value: 'invalid input!' } ];
+main(inputs);
