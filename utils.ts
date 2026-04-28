@@ -1,23 +1,37 @@
-// Utility function to perform network operations with retry logic
+export interface DataItem {
+    id: number;
+    value: any;
+}
 
-export async function fetchWithRetry(url: string, options: RequestInit = {}, retries: number = 3, backoff: number = 300): Promise<Response> {
-    let attempts = 0;
-    while (attempts < retries) {
-        try {
-            const response = await fetch(url, options);
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-            return response;
-        } catch (error) {
-            if (attempts < retries - 1) {
-                const delay = backoff * Math.pow(2, attempts);
-                await new Promise(res => setTimeout(res, delay));
-            } else {
-                throw error; // Rethrow the last error after retries exhausted
-            }
-        }
-        attempts++;
+export class DataHandler {
+    private items: DataItem[] = [];
+
+    constructor(initialData: DataItem[] = []) {
+        this.items = initialData;
     }
-    throw new Error('Max retries reached');
+
+    addItem(item: DataItem): void {
+        this.items.push(item);
+    }
+
+    removeItem(id: number): boolean {
+        const index = this.items.findIndex(item => item.id === id);
+        if (index !== -1) {
+            this.items.splice(index, 1);
+            return true;
+        }
+        return false;
+    }
+
+    getItem(id: number): DataItem | undefined {
+        return this.items.find(item => item.id === id);
+    }
+
+    getAllItems(): DataItem[] {
+        return this.items;
+    }
+
+    clearItems(): void {
+        this.items = [];
+    }
 }
