@@ -1,30 +1,44 @@
-function isValidInput(input: string): boolean {
-    // Check if input is not empty and is a string
-    return typeof input === 'string' && input.trim().length > 0;
+export function isEmpty(obj: Object): boolean {
+    return Object.keys(obj).length === 0;
 }
 
-function processInput(input: string): string {
-    if (!isValidInput(input)) {
-        throw new Error('Invalid input: must be a non-empty string.');
-    }
-    // Continue processing valid input
-    return input.toUpperCase(); // Example transformation
+export function deepClone<T>(obj: T): T {
+    return JSON.parse(JSON.stringify(obj));
 }
 
-function mainProcessingLoop(inputs: string[]): string[] {
-    const results: string[] = [];
-    for (const input of inputs) {
-        try {
-            const result = processInput(input);
-            results.push(result);
-        } catch (error) {
-            console.error(`Error processing input '${input}': ${error.message}`);
+export function merge<T>(target: T, source: Partial<T>): T {
+    return { ...target, ...source };
+}
+
+export function debounce(func: Function, wait: number) {
+    let timeout: NodeJS.Timeout;
+    return function executedFunction(...args: any) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+export function throttle(func: Function, limit: number) {
+    let lastFunc: NodeJS.Timeout;
+    let lastRan: number;
+    return function() {
+        const context = this;
+        const args = arguments;
+        if (!lastRan) {
+            func.apply(context, args);
+            lastRan = Date.now();
+        } else {
+            clearTimeout(lastFunc);
+            lastFunc = setTimeout(function() {
+                if ((Date.now() - lastRan) >= limit) {
+                    func.apply(context, args);
+                    lastRan = Date.now();
+                }
+            }, limit - (Date.now() - lastRan));
         }
-    }
-    return results;
+    };
 }
-
-// Example usage
-const userInputs = ['hello', ' ', 'world', ''];
-const output = mainProcessingLoop(userInputs);
-console.log(output);
