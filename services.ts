@@ -1,49 +1,25 @@
-type User = {
-    id: number;
-    name: string;
-    email: string;
-};
+import axios, { AxiosError } from 'axios';
 
-/**
- * Fetches a user by ID.
- * @param userId The ID of the user to fetch.
- * @returns A promise that resolves to the user object.
- */
-async function fetchUserById(userId: number): Promise<User | null> {
+const MAX_RETRIES = 3;
+const RETRY_DELAY_MS = 1000;
+
+async function delay(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function fetchWithRetry(url: string, options = {}, retries = MAX_RETRIES): Promise<any> {
     try {
-        const response = await fetch(`https://jsonplaceholder.typicode.com/users/${userId}`);
-        if (!response.ok) {
-            throw new Error(`Error fetching user: ${response.statusText}`);
-        }
-        const user: User = await response.json();
-        return user;
+        const response = await axios.get(url, options);
+        return response.data;
     } catch (error) {
-        console.error(error);
-        return null;
+        if (retries === 0) {
+            throw error;
+        }
+        const axiosError = error as AxiosError;
+        console.warn(`Request failed with status ${axiosError.response?.status}. Retrying...`);
+        await delay(RETRY_DELAY_MS);
+        return fetchWithRetry(url, options, retries - 1);
     }
 }
 
-/**
- * Creates a new user.
- * @param user A user object containing name and email.
- * @returns A promise that resolves to the created user object.
- */
-async function createUser(user: Omit<User, 'id'>): Promise<User> {
-    try {
-        const response = await fetch(`https://jsonplaceholder.typicode.com/users`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(user),
-        });
-        if (!response.ok) {
-            throw new Error(`Error creating user: ${response.statusText}`);
-        }
-        const createdUser: User = await response.json();
-        return createdUser;
-    } catch (error) {
-        console.error(error);
-        throw error;
-    }
-}
-
-export { fetchUserById, createUser };
+export { fetchWithRetry };
