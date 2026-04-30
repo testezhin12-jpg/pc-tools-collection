@@ -1,22 +1,23 @@
 import fs from 'fs';
+import path from 'path';
 
 interface Config {
     host: string;
     port: number;
-    environment: string;
+    useHttps: boolean;
 }
 
 const defaultConfig: Config = {
     host: 'localhost',
     port: 3000,
-    environment: 'development',
+    useHttps: false,
 };
 
 function loadConfig(filePath: string): Config {
-    if (fs.existsSync(filePath)) {
-        const configFile = fs.readFileSync(filePath, 'utf-8');
-        const userConfig: Partial<Config> = JSON.parse(configFile);
-        return { ...defaultConfig, ...userConfig };
+    const configPath = path.resolve(filePath);
+    if (fs.existsSync(configPath)) {
+        const fileConfig: Partial<Config> = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+        return { ...defaultConfig, ...fileConfig };
     }
     return defaultConfig;
 }
