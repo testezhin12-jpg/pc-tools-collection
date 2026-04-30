@@ -1,33 +1,24 @@
-export interface UserInput {
-    inputValue: string;
+import fs from 'fs';
+
+interface Config {
+    host: string;
+    port: number;
+    environment: string;
 }
 
-export function validateInput(input: UserInput): boolean {
-    const trimmedInput = input.inputValue.trim();
-    // Check for empty string
-    if (trimmedInput.length === 0) {
-        console.error('Input cannot be empty.');
-        return false;
+const defaultConfig: Config = {
+    host: 'localhost',
+    port: 3000,
+    environment: 'development',
+};
+
+function loadConfig(filePath: string): Config {
+    if (fs.existsSync(filePath)) {
+        const configFile = fs.readFileSync(filePath, 'utf-8');
+        const userConfig: Partial<Config> = JSON.parse(configFile);
+        return { ...defaultConfig, ...userConfig };
     }
-    // Check for maximum length
-    if (trimmedInput.length > 100) {
-        console.error('Input exceeds maximum length of 100 characters.');
-        return false;
-    }
-    // Validate for specific format (if required)
-    const validFormat = /^[a-zA-Z0-9]*$/;
-    if (!validFormat.test(trimmedInput)) {
-        console.error('Input contains invalid characters. Only alphanumeric characters are allowed.');
-        return false;
-    }
-    return true;
+    return defaultConfig;
 }
 
-export function processInput(input: UserInput): void {
-    if (validateInput(input)) {
-        console.log('Processing input: ', input.inputValue);
-        // Main processing logic here
-    } else {
-        console.error('Input validation failed.');
-    }
-}
+export { loadConfig, Config };
