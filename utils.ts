@@ -1,41 +1,33 @@
-export function memoize(fn: Function): Function {
-    const cache: { [key: string]: any } = {};
-    return function (...args: any[]) {
-        const key = JSON.stringify(args);
-        if (cache[key]) {
-            return cache[key];
-        }
-        const result = fn(...args);
-        cache[key] = result;
-        return result;
-    };
+import fs from 'fs';
+import path from 'path';
+import winston from 'winston';
+
+const logDir = path.join(__dirname, 'logs');
+
+if (!fs.existsSync(logDir)) {
+    fs.mkdirSync(logDir);
 }
 
-export function debounce(func: Function, wait: number): Function {
-    let timeout: NodeJS.Timeout | null;
-    return function (...args: any[]) {
-        const later = () => {
-            timeout = null;
-            func(...args);
-        };
-        if (timeout) clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
-}
+const transport = new winston.transports.File({
+    filename: path.join(logDir, 'application-%DATE%.log'),
+    datePattern: 'YYYY-MM-DD',
+    zippedArchive: true,
+    maxSize: '20m',
+    maxFiles: '14d',
+});
 
-export function throttle(func: Function, limit: number): Function {
-    let lastFunc: NodeJS.Timeout | null;
-    let lastRan = 0;
-    return function (...args: any[]) {
-        const context = this;
-        if (!lastRan) {
-            func.apply(context, args);
-            lastRan = Date.now();
-        } else {
-            if (Date.now() - lastRan >= limit) {
-                func.apply(context, args);
-                lastRan = Date.now();
-            }
-        }
-    };
-}
+const logger = winston.createLogger({
+    level: 'info',
+    format: winston.format.combine(
+        winston.format.timestamp(),
+        winston.format.json()
+    ),
+    transports: [
+        transport,
+        new winston.transports.Console({
+            format: winston.format.simple()
+        })
+    ],
+});
+
+export default logger;
