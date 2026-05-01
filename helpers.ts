@@ -1,43 +1,50 @@
-// Helper functions for common operations
-
-/**
- * Function to generate a random string of specified length.
- * @param length - Desired length of the generated string.
- * @returns Randomly generated string.
- */
-function generateRandomString(length: number): string {
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let result = '';
-    const charactersLength = characters.length;
-    for (let i = 0; i < length; i++) {
-        result += characters.charAt(Math.floor(Math.random() * charactersLength));
-    }
-    return result;
+export function isEmpty<T>(obj: T): boolean {
+    return obj === null || obj === undefined || (typeof obj === 'object' && Object.keys(obj).length === 0);
 }
 
-/**
- * Function to debounce another function.
- * @param func - The function to debounce.
- * @param delay - Duration in milliseconds to wait before calling.
- * @returns A debounced function.
- */
-function debounce(func: (...args: any[]) => void, delay: number) {
-    let timeoutId: NodeJS.Timeout;
-    return function(this: any, ...args: any[]) {
-        const context = this;
-        clearTimeout(timeoutId);
-        timeoutId = setTimeout(() => func.apply(context, args), delay);
+export function debounce<F extends (...args: any[]) => any>(func: F, delay: number): (...args: Parameters<F>) => void {
+    let timeoutId: NodeJS.Timeout | null = null;
+    return (...args: Parameters<F>): void => {
+        if (timeoutId) {
+            clearTimeout(timeoutId);
+        }
+        timeoutId = setTimeout(() => {
+            func(...args);
+        }, delay);
     };
 }
 
-/**
- * Function to filter an array based on a predicate function.
- * @param array - The array to filter.
- * @param predicate - A function that defines the condition.
- * @returns A new array with elements that pass the test.
- */
-function filterArray<T>(array: T[], predicate: (value: T) => boolean): T[] {
-    return array.filter(predicate);
+export function throttle<F extends (...args: any[]) => any>(func: F, limit: number): (...args: Parameters<F>) => void {
+    let lastFunc: NodeJS.Timeout | null = null;
+    let lastRan: number | null = null;
+    return (...args: Parameters<F>): void => {
+        if (lastRan === null || (Date.now() - lastRan) >= limit) {
+            func(...args);
+            lastRan = Date.now();
+        } else {
+            if (lastFunc) {
+                clearTimeout(lastFunc);
+            }
+            lastFunc = setTimeout(() => {
+                func(...args);
+                lastRan = Date.now();
+            }, limit - (Date.now() - lastRan));
+        }
+    };
 }
 
-export { generateRandomString, debounce, filterArray };
+export function deepClone<T>(obj: T): T {
+    return JSON.parse(JSON.stringify(obj));
+}
+
+export function mergeDeep<T>(target: T, source: Partial<T>): T {
+    const output = { ...target };
+    for (const key in source) {
+        if (source[key] && typeof source[key] === 'object') {
+            output[key] = mergeDeep(target[key] as T, source[key] as Partial<T>);
+        } else {
+            output[key] = source[key];
+        }
+    }
+    return output;
+}
