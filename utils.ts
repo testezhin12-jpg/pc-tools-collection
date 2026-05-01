@@ -1,33 +1,32 @@
-import fs from 'fs';
-import path from 'path';
-import winston from 'winston';
-
-const logDir = path.join(__dirname, 'logs');
-
-if (!fs.existsSync(logDir)) {
-    fs.mkdirSync(logDir);
+export function safeParseJSON<T>(jsonString: string): T | null {
+    try {
+        return JSON.parse(jsonString);
+    } catch (error) {
+        console.error('Failed to parse JSON:', error);
+        return null;
+    }
 }
 
-const transport = new winston.transports.File({
-    filename: path.join(logDir, 'application-%DATE%.log'),
-    datePattern: 'YYYY-MM-DD',
-    zippedArchive: true,
-    maxSize: '20m',
-    maxFiles: '14d',
-});
+export function validateStringInput(input: string): boolean {
+    if (typeof input !== 'string' || input.trim() === '') {
+        console.error('Invalid string input.');
+        return false;
+    }
+    return true;
+}
 
-const logger = winston.createLogger({
-    level: 'info',
-    format: winston.format.combine(
-        winston.format.timestamp(),
-        winston.format.json()
-    ),
-    transports: [
-        transport,
-        new winston.transports.Console({
-            format: winston.format.simple()
-        })
-    ],
-});
+export function handleApiResponse(response: Response): Promise<any> {
+    if (!response.ok) {
+        console.error('API call failed with status:', response.status);
+        return Promise.reject(new Error('API request failed')); 
+    }
+    return response.json();
+}
 
-export default logger;
+export function calculatePercentage(part: number, total: number): number | null {
+    if (total === 0) {
+        console.error('Total cannot be zero for percentage calculation.');
+        return null;
+    }
+    return (part / total) * 100;
+}
