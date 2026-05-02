@@ -1,25 +1,37 @@
-import axios, { AxiosError } from 'axios';
-
-const MAX_RETRIES = 3;
-const RETRY_DELAY_MS = 1000;
-
-async function delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+// Service to handle user management
+interface User {
+    id: number;
+    name: string;
+    email: string;
 }
 
-async function fetchWithRetry(url: string, options = {}, retries = MAX_RETRIES): Promise<any> {
-    try {
-        const response = await axios.get(url, options);
-        return response.data;
-    } catch (error) {
-        if (retries === 0) {
-            throw error;
-        }
-        const axiosError = error as AxiosError;
-        console.warn(`Request failed with status ${axiosError.response?.status}. Retrying...`);
-        await delay(RETRY_DELAY_MS);
-        return fetchWithRetry(url, options, retries - 1);
+const users: User[] = [];
+
+// Function to add a user
+function addUser(name: string, email: string): User {
+    const newUser: User = { id: users.length + 1, name, email };
+    users.push(newUser);
+    return newUser;
+}
+
+// Function to get all users
+function getUsers(): User[] {
+    return users;
+}
+
+// Function to find a user by ID
+function findUserById(id: number): User | undefined {
+    return users.find(user => user.id === id);
+}
+
+// Function to delete a user by ID
+function deleteUserById(id: number): boolean {
+    const index = users.findIndex(user => user.id === id);
+    if (index !== -1) {
+        users.splice(index, 1);
+        return true;
     }
+    return false;
 }
 
-export { fetchWithRetry };
+export { addUser, getUsers, findUserById, deleteUserById };
