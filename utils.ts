@@ -1,23 +1,31 @@
-export async function retry<T>(fn: () => Promise<T>, retries: number = 3, delay: number = 1000): Promise<T> {
-    let attempt = 0;
-    while (attempt < retries) {
-        try {
-            return await fn();
-        } catch (error) {
-            if (attempt < retries - 1) {
-                await new Promise(res => setTimeout(res, delay));
-            } else {
-                throw error;
-            }
-        }
-        attempt++;
-    }
+import fs from 'fs';
+import path from 'path';
+import winston from 'winston';
+import 'winston-daily-rotate-file';
+
+const logDir = path.resolve(__dirname, 'logs');
+
+if (!fs.existsSync(logDir)) {
+    fs.mkdirSync(logDir);
 }
 
-export function isNetworkError(error: any): boolean {
-    return error && (error.code === 'ENOTFOUND' || error.code === 'ECONNREFUSED');
-}
+const transport = new winston.transports.DailyRotateFile({
+    filename: path.join(logDir, '%DATE%.log'),
+    datePattern: 'YYYY-MM-DD',
+    zippedArchive: true,
+    maxSize: '20m',
+    maxFiles: '14d'
+});
 
-export async function fetchWithRetry(url: string, options: RequestInit = {}, retries: number = 3): Promise<Response> {
-    return retry(() => fetch(url, options), retries);
-}
+const logger = winston.createLogger({
+    level: 'info',
+    format: winston.format.json(),
+    transports: [
+        transport,
+        new winston.transports.Console({
+            format: winston.format.simple()
+        })
+    ]
+});
+
+export default logger;
