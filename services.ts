@@ -1,37 +1,27 @@
-// Service to handle user management
-interface User {
-    id: number;
-    name: string;
-    email: string;
-}
+import { SomeType } from './types';
 
-const users: User[] = [];
+// Caching results to improve performance
+const cache: Record<string, SomeType> = {};
 
-// Function to add a user
-function addUser(name: string, email: string): User {
-    const newUser: User = { id: users.length + 1, name, email };
-    users.push(newUser);
-    return newUser;
-}
-
-// Function to get all users
-function getUsers(): User[] {
-    return users;
-}
-
-// Function to find a user by ID
-function findUserById(id: number): User | undefined {
-    return users.find(user => user.id === id);
-}
-
-// Function to delete a user by ID
-function deleteUserById(id: number): boolean {
-    const index = users.findIndex(user => user.id === id);
-    if (index !== -1) {
-        users.splice(index, 1);
-        return true;
+export const fetchData = async (key: string): Promise<SomeType> => {
+    if (cache[key]) {
+        return Promise.resolve(cache[key]);
     }
-    return false;
-}
 
-export { addUser, getUsers, findUserById, deleteUserById };
+    // Simulating a network request
+    const response = await simulateNetworkRequest(key);
+    cache[key] = response;
+    return response;
+};
+
+const simulateNetworkRequest = async (key: string): Promise<SomeType> => {
+    return new Promise(resolve => {
+        setTimeout(() => {
+            resolve({ key, data: `Data for ${key}` });
+        }, 1000);
+    });
+};
+
+export const clearCache = () => {
+    Object.keys(cache).forEach(key => delete cache[key]);
+};
