@@ -1,25 +1,26 @@
 import fs from 'fs';
-import path from 'path';
 
 interface Config {
     host: string;
     port: number;
-    useHttps: boolean;
+    useSSL: boolean;
 }
 
 const defaultConfig: Config = {
     host: 'localhost',
     port: 3000,
-    useHttps: false,
+    useSSL: false,
 };
 
 function loadConfig(filePath: string): Config {
-    const configPath = path.resolve(filePath);
-    if (fs.existsSync(configPath)) {
-        const fileConfig: Partial<Config> = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-        return { ...defaultConfig, ...fileConfig };
+    try {
+        const rawData = fs.readFileSync(filePath, 'utf8');
+        const userConfig: Partial<Config> = JSON.parse(rawData);
+        return { ...defaultConfig, ...userConfig };
+    } catch (error) {
+        console.error('Error loading configuration:', error);
+        return defaultConfig;
     }
-    return defaultConfig;
 }
 
-export { loadConfig, Config };
+export { Config, loadConfig };
