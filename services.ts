@@ -1,35 +1,25 @@
-import { createLogger, format, transports } from 'winston';
-import { RotationStream } from 'rotating-file-stream';
+interface User { id: number; name: string; email: string; }
 
-const logDirectory = 'log';  // Ensure this directory exists
+class UserService {
+    private users: User[] = [];
 
-const rotatingStream = RotationStream('log-%DATE%.log', {
-    date_format: 'YYYY-MM-DD',
-    frequency: 'daily',
-    verbose: false,
-    path: logDirectory,
-});
+    public addUser(user: User): void {
+        this.users.push(user);
+    }
 
-const logger = createLogger({
-    level: 'info',
-    format: format.combine(
-        format.timestamp(),
-        format.json()
-    ),
-    transports: [
-        new transports.Console(),
-        new transports.Stream({ stream: rotatingStream })
-    ],
-});
+    public getUser(id: number): User | undefined {
+        return this.users.find(user => user.id === id);
+    }
 
-export const logInfo = (message: string) => {
-    logger.info(message);
-};
+    public getAllUsers(): User[] {
+        return this.users;
+    }
 
-export const logError = (message: string) => {
-    logger.error(message);
-};
+    public removeUser(id: number): void {
+        this.users = this.users.filter(user => user.id !== id);
+    }
+}
 
-export const logDebug = (message: string) => {
-    logger.debug(message);
-};
+const userService = new UserService();
+
+export { userService, User };
