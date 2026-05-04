@@ -1,27 +1,35 @@
-import { SomeType } from './types';
+import { createLogger, format, transports } from 'winston';
+import { RotationStream } from 'rotating-file-stream';
 
-// Caching results to improve performance
-const cache: Record<string, SomeType> = {};
+const logDirectory = 'log';  // Ensure this directory exists
 
-export const fetchData = async (key: string): Promise<SomeType> => {
-    if (cache[key]) {
-        return Promise.resolve(cache[key]);
-    }
+const rotatingStream = RotationStream('log-%DATE%.log', {
+    date_format: 'YYYY-MM-DD',
+    frequency: 'daily',
+    verbose: false,
+    path: logDirectory,
+});
 
-    // Simulating a network request
-    const response = await simulateNetworkRequest(key);
-    cache[key] = response;
-    return response;
+const logger = createLogger({
+    level: 'info',
+    format: format.combine(
+        format.timestamp(),
+        format.json()
+    ),
+    transports: [
+        new transports.Console(),
+        new transports.Stream({ stream: rotatingStream })
+    ],
+});
+
+export const logInfo = (message: string) => {
+    logger.info(message);
 };
 
-const simulateNetworkRequest = async (key: string): Promise<SomeType> => {
-    return new Promise(resolve => {
-        setTimeout(() => {
-            resolve({ key, data: `Data for ${key}` });
-        }, 1000);
-    });
+export const logError = (message: string) => {
+    logger.error(message);
 };
 
-export const clearCache = () => {
-    Object.keys(cache).forEach(key => delete cache[key]);
+export const logDebug = (message: string) => {
+    logger.debug(message);
 };
