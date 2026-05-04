@@ -1,26 +1,39 @@
-import fs from 'fs';
-
-interface Config {
-    host: string;
-    port: number;
-    useSSL: boolean;
+export interface AppConfig {
+    apiUrl: string;
+    timeout: number;
+    retryCount: number;
 }
 
-const defaultConfig: Config = {
-    host: 'localhost',
-    port: 3000,
-    useSSL: false,
+export const defaultConfig: AppConfig = {
+    apiUrl: 'https://api.example.com',
+    timeout: 5000,
+    retryCount: 3,
 };
 
-function loadConfig(filePath: string): Config {
-    try {
-        const rawData = fs.readFileSync(filePath, 'utf8');
-        const userConfig: Partial<Config> = JSON.parse(rawData);
-        return { ...defaultConfig, ...userConfig };
-    } catch (error) {
-        console.error('Error loading configuration:', error);
-        return defaultConfig;
+export function getConfig(): AppConfig {
+    const configFromEnv = process.env.APP_CONFIG;
+    if (configFromEnv) {
+        try {
+            const parsedConfig = JSON.parse(configFromEnv);
+            return {
+                ...defaultConfig,
+                ...parsedConfig,
+            };
+        } catch (error) {
+            console.error('Error parsing config from environment:', error);
+        }
     }
+    return defaultConfig;
 }
 
-export { Config, loadConfig };
+export function validateConfig(config: AppConfig): boolean {
+    const urlRegex = /^(https?:\/\/) ?([\w.-]+)?(\:[0-9]+)?(\/.*)?$/;
+    return 
+        typeof config.apiUrl === 'string' && 
+        urlRegex.test(config.apiUrl) && 
+        typeof config.timeout === 'number' && 
+        config.timeout > 0 && 
+        typeof config.retryCount === 'number' && 
+        Number.isInteger(config.retryCount) && 
+        config.retryCount >= 0;
+}
