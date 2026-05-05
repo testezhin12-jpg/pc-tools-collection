@@ -1,30 +1,35 @@
-export function validateInput(input: string): boolean {
-    const trimmedInput = input.trim();
-    // Check if input is empty
-    if (trimmedInput.length === 0) {
-        console.error('Input cannot be empty.');
-        return false;
-    }
-    // Check for length constraints
-    if (trimmedInput.length < 3 || trimmedInput.length > 100) {
-        console.error('Input length must be between 3 and 100 characters.');
-        return false;
-    }
-    // Check for invalid characters (example: only letters and numbers)
-    const validInputRegex = /^[a-zA-Z0-9 ]*$/;
-    if (!validInputRegex.test(trimmedInput)) {
-        console.error('Input contains invalid characters.');
-        return false;
-    }
-    return true;
+import fs from 'fs';
+import path from 'path';
+import winston from 'winston';
+import 'winston-daily-rotate-file';
+
+const logDir = path.join(__dirname, 'logs');
+
+// Create logs directory if it doesn't exist
+if (!fs.existsSync(logDir)) {
+    fs.mkdirSync(logDir);
 }
 
-export function processInput(input: string): void {
-    if (!validateInput(input)) {
-        console.error('Input validation failed.');
-        return;
-    }
-    // Proceed with processing the valid input
-    console.log('Processing input:', input);
-    // ... additional processing logic
-}
+// Configure winston to use daily rotate file transport
+const transport = new winston.transports.DailyRotateFile({
+    filename: path.join(logDir, 'application-%DATE%.log'),
+    datePattern: 'YYYY-MM-DD',
+    zippedArchive: true,
+    maxSize: '20m',
+    maxFiles: '14d'
+});
+
+// Create a logger instance
+const logger = winston.createLogger({
+    level: 'info',
+    format: winston.format.combine(
+        winston.format.timestamp(),
+        winston.format.json()
+    ),
+    transports: [
+        transport,
+        new winston.transports.Console() // Also log to console
+    ]
+});
+
+export default logger;
