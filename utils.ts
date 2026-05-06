@@ -1,35 +1,41 @@
-function isEmpty(value: any): boolean {
-    if (value === null || value === undefined) {
-        return true;
-    } else if (typeof value === 'string') {
-        return value.trim().length === 0;
-    } else if (Array.isArray(value)) {
-        return value.length === 0;
-    } else if (typeof value === 'object') {
-        return Object.keys(value).length === 0;
-    }
-    return false;
+import fs from 'fs';
+import path from 'path';
+import winston from 'winston';
+import 'winston-daily-rotate-file';
+
+const logDir = path.join(__dirname, 'logs');
+
+if (!fs.existsSync(logDir)) {
+    fs.mkdirSync(logDir);
 }
 
-function deepMerge<T extends object>(target: T, ...sources: Partial<T>[]): T {
-    sources.forEach(source => {
-        if (source) {
-            Object.keys(source).forEach(key => {
-                const sourceValue = source[key];
-                const targetValue = target[key];
-                if (isEmpty(targetValue) || typeof targetValue !== 'object') {
-                    target[key] = sourceValue;
-                } else {
-                    target[key] = deepMerge(targetValue, sourceValue);
-                }
-            });
-        }
-    });
-    return target;
-}
+const transport = new winston.transports.DailyRotateFile({
+    filename: '%DATE%-results.log',
+    datePattern: 'YYYY-MM-DD',
+    dirname: logDir,
+    zippedArchive: true,
+    maxSize: '20m',
+    maxFiles: '14d'
+});
 
-function flattenArray<T>(arr: T[][]): T[] {
-    return arr.reduce((acc, val) => acc.concat(val), []);
-}
+const logger = winston.createLogger({
+    level: 'info',
+    format: winston.format.combine(
+        winston.format.timestamp(),
+        winston.format.json()
+    ),
+    transports: [
+        transport,
+        new winston.transports.Console()
+    ]
+});
 
-export { isEmpty, deepMerge, flattenArray };
+export const logInfo = (message: string) => {
+    logger.info(message);
+};
+
+export const logError = (message: string) => {
+    logger.error(message);
+};
+
+export default logger;
