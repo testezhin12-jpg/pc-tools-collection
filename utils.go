@@ -1,50 +1,36 @@
-// Package db provides a connection pool with health checks
-package db
+package utils
 
 import (
-    "database/sql"
-    "fmt"
-    "sync"
-    "time"
-    _ "github.com/lib/pq" // PostgreSQL driver
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"os"
 )
 
-// Pool represents a database connection pool
-type Pool struct {
-    mu    sync.Mutex
-    db    *sql.DB
-    alive bool
+// ReadFile reads a file and returns its contents
+func ReadFile(filename string) (string, error) {
+	data, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return "", err
+	}
+	return string(data), nil
 }
 
-// NewPool initializes a new connection pool
-func NewPool(dataSource string, maxIdle, maxOpen int) (*Pool, error) {
-    db, err := sql.Open("postgres", dataSource)
-    if err != nil {
-        return nil, err
-    }
-    db.SetMaxIdleConns(maxIdle)
-    db.SetMaxOpenConns(maxOpen)
-    pool := &Pool{db: db, alive: true}
-    go pool.healthCheck()
-    return pool, nil
+// WriteFile writes data to a file
+func WriteFile(filename, data string) error {
+	return ioutil.WriteFile(filename, []byte(data), os.ModePerm)
 }
 
-// healthCheck periodically checks the health of the connection
-func (p *Pool) healthCheck() {
-    for range time.Tick(30 * time.Second) {
-        p.mu.Lock()
-        err := p.db.Ping()
-        p.alive = (err == nil)
-        p.mu.Unlock()
-        if !p.alive {
-            fmt.Println("Database connection lost")
-        }
-    }
+// MarshalJSON converts an interface to JSON
+func MarshalJSON(v interface{}) (string, error) {
+	jsonData, err := json.Marshal(v)
+	if err != nil {
+		return "", err
+	}
+	return string(jsonData), nil
 }
 
-// Get returns the underlying database connection
-func (p *Pool) Get() (*sql.DB, bool) {
-    p.mu.Lock()
-    defer p.mu.Unlock()
-    return p.db, p.alive
+// UnmarshalJSON converts JSON string to interface
+func UnmarshalJSON(data string, v interface{}) error {
+	return json.Unmarshal([]byte(data), v)
 }
