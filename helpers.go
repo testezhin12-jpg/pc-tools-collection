@@ -1,7 +1,61 @@
-package helpers
+package main
 
-import (\n    "encoding/json"\n    "io/ioutil"\n    "log"\n    "os"\n    "time"\n    "sync"\n)\n
-var (\n    config     Config\n    configLock sync.RWMutex\n)\n
-type Config struct {\n    Setting1 string `json:"setting1"`\n    Setting2 int `json:"setting2"`\n}\n
-func LoadConfig(filePath string) error {\n    data, err := ioutil.ReadFile(filePath)\n    if err != nil {\n        return err\n    }\n    var newConfig Config\n    if err := json.Unmarshal(data, &newConfig); err != nil {\n        return err\n    }\n    configLock.Lock()\n    config = newConfig\n    configLock.Unlock()\n    return nil\n}\n
-func WatchConfig(filePath string, interval time.Duration) {\n    for {\n        time.Sleep(interval)\n        if err := LoadConfig(filePath); err != nil {\n            log.Printf("Error loading config: %v", err)\n        }\n    }\n}
+import (
+	"context"
+	"fmt"
+	"time"
+)
+
+type Task struct {
+	ID      string
+	Execute func() error
+}
+
+type Scheduler struct {
+	tasks []Task
+}
+
+func NewScheduler() *Scheduler {
+	return &Scheduler{tasks: []Task{}}
+}
+
+func (s *Scheduler) AddTask(t Task) {
+	s.tasks = append(s.tasks, t)
+}
+
+func (s *Scheduler) Start(ctx context.Context, interval time.Duration) {
+	go func() {
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			default:
+				for _, task := range s.tasks {
+					if err := task.Execute(); err != nil {
+						fmt.Printf("Error executing task %s: %v\n", task.ID, err)
+					}
+				}
+			}
+			time.Sleep(interval)
+		}
+	}()
+}
+
+func main() {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	
+	scheduler := NewScheduler()
+	scheduler.AddTask(Task{ID: "task1", Execute: func() error {
+		fmt.Println("Task 1 executing...")
+		return nil
+	}})
+	scheduler.AddTask(Task{ID: "task2", Execute: func() error {
+		fmt.Println("Task 2 executing...")
+		return nil
+	}})
+	scheduler.Start(ctx, 2*time.Second)
+	
+	// Run for a while before exiting
+	time.Sleep(10 * time.Second)
+}
